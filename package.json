@@ -6,7 +6,7 @@
     "start": "ts-node index.ts"
   },
   "author": "Alex Kopen",
-  "license": "ISC",
+  "license": "GPL",
   "dependencies": {
     "@types/node": "^12.7.7",
     "cheerio": "^1.0.0-rc.3",
