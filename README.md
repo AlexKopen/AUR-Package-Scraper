@@ -21,8 +21,8 @@ All package meta data will be saved to `aur-package-data.json`.  As of 9/25/19, 
 	{
 		"name": "yay",
 		"version": "9.3.1-1",
-		"votes": "793",
-		"popularity": "61.36",
+		"votes": 793,
+		"popularity": 61.36,
 		"description": "Yet another yogurt. Pacman wrapper and AUR helper written in go.",
 		"maintainer": "jguer"
 	}
