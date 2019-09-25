@@ -1,22 +1,22 @@
 # AUR Package Scraper
 Scrapes package meta data from the [Arch User Repository](https://aur.archlinux.org/packages/)
 
-# About
-This script leverages [Puppeteer](https://github.com/GoogleChrome/puppeteer) to scrape and [Cheerio](https://github.com/cheeriojs/cheerio) to parse package data, from the Arch User Repository. 
+## About
+This script leverages [Puppeteer](https://github.com/GoogleChrome/puppeteer) to scrape and [Cheerio](https://github.com/cheeriojs/cheerio) to parse package data from the Arch User Repository. 
 
-# Installation
+## Installation
 ```
 npm install
 ```
 
-# Usage
+## Usage
 ```
 npm start
 ```
 
-This will scrape all package meta data, and save it to `aur-package-data.json`.  The script takes approximately 4 minutes to run with a stable internet connection.
+All package meta data will be saved to `aur-package-data.json`.  The total runtime is approximately 4 minutes with a stable internet connection.
 
-# Sample JSON Output
+## Sample JSON Output
 ```json
 	{
 		"name": "yay",
