@@ -14,7 +14,7 @@ npm install
 npm start
 ```
 
-All package meta data will be saved to `aur-package-data.json`.  The total runtime is approximately 4 minutes with a stable internet connection.
+All package meta data will be saved to `aur-package-data.json`.  As of 9/25/19, The total runtime is approximately 4.5 minutes with a stable internet connection.  The generated JSON file is around 473,100 lines long and 11.7 Mib in size.
 
 ## Sample JSON Output
 ```json
