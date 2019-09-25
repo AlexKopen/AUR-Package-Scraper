@@ -2,7 +2,7 @@ import * as puppeteer from 'puppeteer';
 import * as cheerio from 'cheerio';
 import * as writeJsonFile from 'write-json-file';
 
-const values = [];
+const packagesMetadata = [];
 const archUrlStart = 'https://aur.archlinux.org/packages/?O=';
 const archUrlEnd = '&SeB=nd&K=&outdated=&SB=n&SO=a&PP=250&do_Search=Go';
 const pageSize = 250;
@@ -29,7 +29,7 @@ async function scrapePackageInfo() {
         $('.results tbody tr').each((index, element) => {
             const columns = $(element).children('td');
 
-            values.push(
+            packagesMetadata.push(
                 {
                     name: $(columns.get(0)).children('a').text(),
                     version: $(columns.get(1)).text(),
@@ -46,7 +46,7 @@ async function scrapePackageInfo() {
         console.log(`Scraped ${i + pageSize} packages`);
     }
 
-    await writeJsonFile('aur-package-data.json', values);
+    await writeJsonFile('aur-package-data.json', packagesMetadata);
 }
 
 async function initialPageLoad(url) {
