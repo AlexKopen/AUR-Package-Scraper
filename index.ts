@@ -2,29 +2,37 @@ import * as puppeteer from 'puppeteer';
 import * as cheerio from 'cheerio';
 import * as writeJsonFile from 'write-json-file';
 
-const packagesMetadata = [];
-const archUrlStart = 'https://aur.archlinux.org/packages/?O=';
-const archUrlEnd = '&SeB=nd&K=&outdated=&SB=n&SO=a&PP=250&do_Search=Go';
-const pageSize = 250;
-let browser, totalPackages, page, bodyHtml, $;
+const {Cluster} = require('puppeteer-cluster');
+const os = require('os');
 
 (async () => {
-    browser = await puppeteer.launch();
-    await fetchPageStats();
-    await scrapePackageInfo();
-    await browser.close();
-})();
+    const packagesMetadata = [];
+    const archUrlStart = 'https://aur.archlinux.org/packages/?O=';
+    const archUrlEnd = '&SeB=nd&K=&outdated=&SB=n&SO=a&PP=250&do_Search=Go';
+    const pageCount = 250;
+    let count = 0;
 
-async function fetchPageStats() {
-    await initialPageLoad(`${archUrlStart}${archUrlEnd}`);
+    // Fetch packages stats
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto(`${archUrlStart}${archUrlEnd}`);
+    const bodyHtml = await page.evaluate(() => document.body.innerHTML);
+    const $ = cheerio.load(bodyHtml);
 
     const statText = ($('.pkglist-stats').first().children('p').first().text());
-    totalPackages = statText.trim().split(' ')[0];
-}
+    const totalPackages = statText.trim().split(' ')[0];
 
-async function scrapePackageInfo() {
-    for (let i = 0; i <= totalPackages; i += pageSize) {
-        await initialPageLoad(`${archUrlStart}${i}${archUrlEnd}`);
+    // Define cluster parameters
+    const cluster = await Cluster.launch({
+        concurrency: Cluster.CONCURRENCY_CONTEXT,
+        maxConcurrency: os.cpus().length
+    });
+
+    // Scrape individual page package data as queue is populated
+    await cluster.task(async ({page, data: url}) => {
+        await page.goto(url);
+        let bodyHtml = await page.evaluate(() => document.body.innerHTML);
+        let $ = cheerio.load(bodyHtml);
 
         $('.results tbody tr').each((index, element) => {
             const columns = $(element).children('td');
@@ -39,19 +47,20 @@ async function scrapePackageInfo() {
                     maintainer: $(columns.get(5)).children('a').text(),
                 }
             );
-
-
         });
 
-        console.log(`Scraped ${i + pageSize} packages`);
+        console.log(`${++count}/${Math.floor(totalPackages / pageCount)} pages scraped`)
+    });
+
+    // Queue pages to be scraped
+    for (let i = 0; i <= totalPackages; i += pageCount) {
+        cluster.queue(`${archUrlStart}${i}${archUrlEnd}`);
     }
 
+    // Write results to JSON file when queue is empty
+    await cluster.idle();
+    await cluster.close();
     await writeJsonFile('aur-package-data.json', packagesMetadata);
-}
 
-async function initialPageLoad(url) {
-    page = await browser.newPage();
-    await page.goto(url);
-    bodyHtml = await page.evaluate(() => document.body.innerHTML);
-    $ = cheerio.load(bodyHtml);
-}
+    process.exit(0);
+})();
