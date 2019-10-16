@@ -49,7 +49,7 @@ const os = require('os');
             );
         });
 
-        console.log(`${++count}/${Math.floor(totalPackages / pageCount)} pages scraped`)
+        console.log(`${++count}/${Math.floor(totalPackages / pageCount) + 1} pages scraped`)
     });
 
     // Queue pages to be scraped
